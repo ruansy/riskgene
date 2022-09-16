@@ -37,9 +37,9 @@ def mysvm(x_train, x_test, y_train, y_test):
     return acc, f1, auc
 
 
-def nb(x_train, x_test, y_train, y_test):
+def nb(x_train, x_test, y_train, y_test, sample_weights):
     model = GaussianNB()
-    model.fit(x_train, y_train)
+    model.fit(x_train, y_train, sample_weight=sample_weights)
     y_pred = model.predict(x_test)
     y_score = model.predict_proba(x_test)[:, 1]
     acc, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
