@@ -56,6 +56,22 @@ def training(emb_path, cl_method, ge_method):
     df.to_excel(result_file_path)
 
 
+def get_project_rootpath():
+    """
+    获取项目根目录。此函数的能力体现在，不论当前module被import到任何位置，都可以正确获取项目根目录
+    :return:
+    """
+    path = os.path.realpath(os.curdir)
+    while True:
+        for subpath in os.listdir(path):
+            # PyCharm项目中，'.idea'是必然存在的，且名称唯一
+            if '.idea' in subpath:
+                return path
+        path = os.path.dirname(path)
+
+
+os.chdir(get_project_rootpath())
+
 # 文件路径
 EMB_ROOT_PATH = 'data/emb/'
 PPI_PATH = 'data/network/PPI-Network.txt'

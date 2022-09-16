@@ -1,15 +1,15 @@
-from sklearn.model_selection import cross_val_score, GridSearchCV
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier
 from sklearn import metrics
-from xgboost import XGBClassifier
 from sklearn import svm
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
 
 
 def evaluation(y_pred, y_true, y_score):
     acc = metrics.accuracy_score(y_pred=y_pred, y_true=y_true)
-    f1 = metrics.f1_score(y_true=y_true, y_pred=y_pred)
+    f1 = metrics.f1_score(y_true=y_true, y_pred=y_pred, average='micro')
     auc = metrics.roc_auc_score(y_true=y_true, y_score=y_score)
     precision = metrics.precision_score(y_true, y_pred, average='micro')
     recall = metrics.recall_score(y_true, y_pred, average='micro')
