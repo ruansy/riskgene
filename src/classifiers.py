@@ -11,7 +11,9 @@ def evaluation(y_pred, y_true, y_score):
     acc = metrics.accuracy_score(y_pred=y_pred, y_true=y_true)
     f1 = metrics.f1_score(y_true=y_true, y_pred=y_pred)
     auc = metrics.roc_auc_score(y_true=y_true, y_score=y_score)
-    return acc, f1, auc
+    precision = metrics.precision_score(y_true, y_pred, average='micro')
+    recall = metrics.recall_score(y_true, y_pred, average='micro')
+    return acc, precision, recall, f1, auc
 
 
 def forest(x_train, x_test, y_train, y_test):
@@ -42,8 +44,8 @@ def nb(x_train, x_test, y_train, y_test, sample_weights):
     model.fit(x_train, y_train, sample_weight=sample_weights)
     y_pred = model.predict(x_test)
     y_score = model.predict_proba(x_test)[:, 1]
-    acc, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
-    return acc, f1, auc
+    acc, precision, recall, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
+    return acc, precision, recall, f1, auc
 
 
 def bagging(x_train, y_train, x_test, y_test):

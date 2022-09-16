@@ -18,7 +18,8 @@ def parse_line_emb(file_name, positive_gene_id_set, risklevel):
         data = [line.strip().split() for line in f.readlines()[1:]]
     X = [line[1:] for line in data]
     keys = risklevel.keys()
-    sample_weights = [risklevel[int(line[0])] if int(line[0]) in keys else 1 for line in data]
+    # sample_weights = [risklevel[int(line[0])] if int(line[0]) in keys else 1 for line in data]
+    sample_weights = [1 for line in data]
     target = [1 if int(line[0]) in positive_gene_id_set else 0 for line in data]
     X = np.asarray(X, dtype=float)
     target = np.asarray(target, dtype=int)
@@ -30,11 +31,13 @@ def line_training(positive_gene_id_set, risklevel: dict):
     results = []
     for name in line_filenames:
         dim, X, y, sample_weights = parse_line_emb(name, positive_gene_id_set, risklevel)
-        x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-        acc, f1, auc = cl.nb(x_train, x_test, y_train, y_test, sample_weights)
-        results.append([dim, acc, f1, auc])
-        print('dim={},accuracy={}，f1-score={},auc={}'
-              .format(dim, acc, f1, auc))
+        x_train, x_test, y_train, y_test, sample_weights_train, sample_weights_test = train_test_split(X, y,
+                                                                                                       sample_weights,
+                                                                                                       test_size=0.3)
+        acc, precision, recall, f1, auc = cl.nb(x_train, x_test, y_train, y_test, sample_weights_train)
+        results.append([dim, acc, precision, recall, f1, auc])
+        print('dim={}, accuracy={}, precision={}, recall={}, f1-score={}, auc={}'
+              .format(dim, acc, precision, recall, f1, auc))
     return results
 
 

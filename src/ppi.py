@@ -56,7 +56,7 @@ def set_candidate_gene(filepath, k: int) -> set:
 
     dic = df.set_index(['id'])['count'].to_dict()
     can = [key for key, val in dic.items() if val >= k]
-    return set(can),dic
+    return set(can), dic
 
 
 def convertID2name(gene_id_list):
