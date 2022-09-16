@@ -1,9 +1,11 @@
 import os
-import pandas as pd
+
 import numpy as np
-from src import ppi
-from src import classifiers as cl
+import pandas as pd
 from sklearn.model_selection import train_test_split
+
+from src import classifiers as cl
+from src import ppi
 
 
 def parse_emb(ge_method, file_name):
@@ -53,8 +55,6 @@ def training(emb_path, cl_method, ge_method):
                           columns=['dim', 'acc', 'f1', 'auc'])
     df.to_excel(result_file_path)
 
-
-os.chdir('C:\\Users\\dell\\PycharmProjects\\riskgene')
 
 # 文件路径
 EMB_ROOT_PATH = 'data/emb/'
