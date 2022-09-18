@@ -45,7 +45,10 @@ def nb(x_train, x_test, y_train, y_test, sample_weights):
     y_pred = model.predict(x_test)
     y_score = model.predict_proba(x_test)[:, 1]
     acc, precision, recall, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
-    return acc, precision, recall, f1, auc
+    report = metrics.classification_report(y_true=y_test,
+                                           y_pred=y_pred,
+                                           digits=4)
+    return acc, precision, recall, f1, auc, report
 
 
 def bagging(x_train, y_train, x_test, y_test):

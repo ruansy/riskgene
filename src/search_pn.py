@@ -1,13 +1,19 @@
 # 寻找最优秀的正负例策略
 # 使用line算法的emb向量
-# 使用
 
 import os
-import pandas as pd
+
 import numpy as np
-from src import ppi
-from src import classifiers as cl
 from sklearn.model_selection import train_test_split
+from sklearn.utils.class_weight import compute_class_weight
+
+from src import classifiers as cl
+from src import ppi
+
+
+def class_balance(labels):
+    weight = compute_class_weight(class_weight='balanced', classes=[0, 1], y=labels)
+    return weight
 
 
 def parse_line_emb(file_name, positive_gene_id_set, risklevel):
@@ -17,12 +23,16 @@ def parse_line_emb(file_name, positive_gene_id_set, risklevel):
     with open(file_path, 'r') as f:
         data = [line.strip().split() for line in f.readlines()[1:]]
     X = [line[1:] for line in data]
-    keys = risklevel.keys()
-    # sample_weights = [risklevel[int(line[0])] if int(line[0]) in keys else 1 for line in data]
-    sample_weights = [1 for line in data]
+
     target = [1 if int(line[0]) in positive_gene_id_set else 0 for line in data]
     X = np.asarray(X, dtype=float)
     target = np.asarray(target, dtype=int)
+
+    class_weight = compute_class_weight(class_weight='balanced', classes=[0, 1], y=target)
+    keys = risklevel.keys()
+    sample_weights = [risklevel[int(line[0])] * class_weight[1] if int(line[0]) in keys else class_weight[0] for line in
+                      data]
+    # sample_weights = [1 for line in data]
     return dim, X, target, sample_weights
 
 
@@ -34,10 +44,12 @@ def line_training(positive_gene_id_set, risklevel: dict):
         x_train, x_test, y_train, y_test, sample_weights_train, sample_weights_test = train_test_split(X, y,
                                                                                                        sample_weights,
                                                                                                        test_size=0.3)
-        acc, precision, recall, f1, auc = cl.nb(x_train, x_test, y_train, y_test, sample_weights_train)
-        results.append([dim, acc, precision, recall, f1, auc])
+        acc, precision, recall, f1, auc, report = cl.nb(x_train, x_test, y_train, y_test, sample_weights_train)
+        results.append([dim, acc, precision, recall, f1, auc, report])
         print('dim={}, accuracy={}, precision={}, recall={}, f1-score={}, auc={}'
               .format(dim, acc, precision, recall, f1, auc))
+        print(report)
+
     return results
 
 
