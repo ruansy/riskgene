@@ -16,14 +16,15 @@ def evaluation(y_pred, y_true, y_score):
     return acc, precision, recall, f1, auc
 
 
-def forest(x_train, x_test, y_train, y_test,sample_weights):
-    rf = RandomForestClassifier()
+def forest(x_train, x_test, y_train, y_test, sample_weights):
+    rf = RandomForestClassifier(n_jobs=6)
     # 超参数搜索
     param = {"n_estimators": [20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
              "max_depth": [25, 35, 45, 55, 65, 75, 85, 95]}
     gc = GridSearchCV(rf, param_grid=param, cv=5)
     # 训练
-    gc.fit(x_train, y_train,sample_weight=sample_weights)
+    print('start training')
+    gc.fit(x_train, y_train, sample_weight=sample_weights)
     # 交叉验证网格搜索的结果
     print("在测试集上的准确率：", gc.score(x_test, y_test))
     print("在验证集上的准确率：", gc.best_score_)

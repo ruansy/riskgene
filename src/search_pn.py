@@ -43,14 +43,15 @@ def line_training(positive_gene_id_set, risklevel: dict):
         x_train, x_test, y_train, y_test, sample_weights_train, sample_weights_test = train_test_split(X, y,
                                                                                                        sample_weights,
                                                                                                        test_size=0.3)
+        cl.forest(x_train, x_test, y_train, y_test, sample_weights_train)
         # acc, precision, recall, f1, auc, report = cl.nb(x_train, x_test, y_train, y_test, sample_weights_train)
-        acc, precision, recall, f1, auc, report = cl.forest(x_train, x_test, y_train, y_test, sample_weights_train)
+        # acc, precision, recall, f1, auc, report = cl.forest(x_train, x_test, y_train, y_test, sample_weights_train)
         # results.append([dim, acc, precision, recall, f1, auc, report])
         # print('dim={}, accuracy={}, precision={}, recall={}, f1-score={}, auc={}'
         #       .format(dim, acc, precision, recall, f1, auc))
         # print(report)
 
-    # return results
+    return results
 
 
 def search_pn():
