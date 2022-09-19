@@ -11,11 +11,6 @@ from src import classifiers as cl
 from src import ppi
 
 
-def class_balance(labels):
-    weight = compute_class_weight(class_weight='balanced', classes=[0, 1], y=labels)
-    return weight
-
-
 def parse_line_emb(file_name, positive_gene_id_set, risklevel):
     data = file_name.strip().split('_')
     dim = int(data[1].rstrip('.emb')[1:])
@@ -32,6 +27,8 @@ def parse_line_emb(file_name, positive_gene_id_set, risklevel):
     keys = risklevel.keys()
     sample_weights = [risklevel[int(line[0])] * class_weight[1] if int(line[0]) in keys else class_weight[0] for line in
                       data]
+    # sample_weights = [class_weight[1] if int(line[0]) in keys else class_weight[0] for line in
+    #                   data]
     # sample_weights = [1 for line in data]
     return dim, X, target, sample_weights
 
@@ -41,22 +38,26 @@ def line_training(positive_gene_id_set, risklevel: dict):
     results = []
     for name in line_filenames:
         dim, X, y, sample_weights = parse_line_emb(name, positive_gene_id_set, risklevel)
+        if dim != 512:
+            continue
         x_train, x_test, y_train, y_test, sample_weights_train, sample_weights_test = train_test_split(X, y,
                                                                                                        sample_weights,
                                                                                                        test_size=0.3)
-        acc, precision, recall, f1, auc, report = cl.nb(x_train, x_test, y_train, y_test, sample_weights_train)
-        results.append([dim, acc, precision, recall, f1, auc, report])
-        print('dim={}, accuracy={}, precision={}, recall={}, f1-score={}, auc={}'
-              .format(dim, acc, precision, recall, f1, auc))
-        print(report)
+        # acc, precision, recall, f1, auc, report = cl.nb(x_train, x_test, y_train, y_test, sample_weights_train)
+        acc, precision, recall, f1, auc, report = cl.forest(x_train, x_test, y_train, y_test, sample_weights_train)
+        # results.append([dim, acc, precision, recall, f1, auc, report])
+        # print('dim={}, accuracy={}, precision={}, recall={}, f1-score={}, auc={}'
+        #       .format(dim, acc, precision, recall, f1, auc))
+        # print(report)
 
-    return results
+    # return results
 
 
 def search_pn():
     results = {}
     params = {
-        'k': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        # 'k': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        'k': [6]
     }
     for k in params['k']:
         positive_gene_id_set, risk_level = ppi.set_candidate_gene(GENECOUNT_PATH, k)

@@ -16,13 +16,14 @@ def evaluation(y_pred, y_true, y_score):
     return acc, precision, recall, f1, auc
 
 
-def forest(x_train, x_test, y_train, y_test):
+def forest(x_train, x_test, y_train, y_test,sample_weights):
     rf = RandomForestClassifier()
     # 超参数搜索
-    param = {"n_estimators": [10, 20, 30, 40], "max_depth": [25, 35, 45]}
+    param = {"n_estimators": [20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
+             "max_depth": [25, 35, 45, 55, 65, 75, 85, 95]}
     gc = GridSearchCV(rf, param_grid=param, cv=5)
     # 训练
-    gc.fit(x_train, y_train)
+    gc.fit(x_train, y_train,sample_weight=sample_weights)
     # 交叉验证网格搜索的结果
     print("在测试集上的准确率：", gc.score(x_test, y_test))
     print("在验证集上的准确率：", gc.best_score_)
@@ -86,3 +87,42 @@ def xgboost(x_train, y_train, x_test, y_test):
     xgboost.fit(x_train, y_train)
     y_pred = xgboost.predict(x_test)
     # print("xgboost accuracy : %.4g" % accuracy_score(y_test, y_pred))
+
+# class Classifier():
+#     def __init__(self, data, candidate, risklevel):
+#         self.data = data
+#         self.candidate = candidate
+#         self.risklevel = risklevel
+#         self.X = None
+#         self.y = None
+#
+#     def generate_training_data(self):
+#         X = [line[1:] for line in self.data]
+#
+#         target = [1 if int(line[0]) in self.candidate else 0 for line in self.data]
+#         self.X = np.asarray(X, dtype=float)
+#         target = np.asarray(target, dtype=int)
+#         class_weight = compute_class_weight(class_weight='balanced', classes=[0, 1], y=target)
+#         keys = self.risklevel.keys()
+#         self.sample_weights = [
+#             self.risklevel[int(line[0])] * class_weight[1] if int(line[0]) in keys else class_weight[0]
+#             for
+#             line in
+#             self.data]
+#         return
+
+# def classify(method, data, candidate, risklevel):
+#     # methods = ('svm', 'rf', 'nb')
+#     X = [line[1:] for line in data]
+#     target = [1 if int(line[0]) in candidate else 0 for line in data]
+#     X = np.asarray(X, dtype=float)
+#     target = np.asarray(target, dtype=int)
+#     class_weight = compute_class_weight(class_weight='balanced', classes=[0, 1], y=target)
+#     keys = risklevel.keys()
+#     sample_weights = [
+#         risklevel[int(line[0])] * class_weight[1] if int(line[0]) in keys else class_weight[0]
+#         for line in data]
+#     if method=='nb':
+#         model = GaussianNB()
+#     elif method=='svm':
+#         model=svm.SVC()
