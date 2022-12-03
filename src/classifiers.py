@@ -1,56 +1,79 @@
 from sklearn import metrics
-from sklearn import svm
-from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 
 
-def evaluation(y_pred, y_true, y_score):
-    acc = metrics.accuracy_score(y_pred=y_pred, y_true=y_true)
-    f1 = metrics.f1_score(y_true=y_true, y_pred=y_pred)
-    auc = metrics.roc_auc_score(y_true=y_true, y_score=y_score)
-    precision = metrics.precision_score(y_true, y_pred)
-    recall = metrics.recall_score(y_true, y_pred)
-    return acc, precision, recall, f1, auc
+class Cmodel():
+    def __init__(self, features, labels, sample_weights):
+        self.y_score = None
+        self.y_pred = None
+        self.features = features
+        self.labels = labels
+        self.model = None
+        self.features_train, self.features_test, self.labels_train, self.labels_test, self.weights_train, self.weights_test = train_test_split(
+            features, labels, sample_weights, test_size=0.3)
+
+    def set_model(self, model):
+        self.model = model
+
+    def training(self):
+        self.model.fit(self.features_train, self.labels_train, sample_weight=self.weights_train)
+        self.y_pred = self.model.predict(self.features_test)
+        self.y_score = self.model.predict_proba(self.features_test)[:, 1]
+        return
+
+    def evaluation(self):
+        # 计算准确率
+        acc = metrics.accuracy_score(y_pred=self.y_pred, y_true=self.labels_test)
+        # 计算精确率和召回率
+        precision = metrics.precision_score(y_true=self.labels_test, y_pred=self.y_pred)
+        recall = metrics.recall_score(y_true=self.labels_test, y_pred=self.y_pred)
+        # 计算F1分数和AUC
+        f1 = metrics.f1_score(y_true=self.labels_test, y_pred=self.y_pred)
+        auc = metrics.roc_auc_score(y_true=self.labels_test, y_score=self.y_score)
+        # 混淆矩阵
+        confusion_matrix = metrics.confusion_matrix(y_true=self.labels_test, y_pred=self.y_pred)
+        # 结果报告
+        return acc, precision, recall, f1, auc, confusion_matrix
+
+    def classify_report(self):
+        report = metrics.classification_report(y_true=self.labels_test, y_pred=self.y_pred, digits=4)
+        return report
 
 
-def forest(x_train, x_test, y_train, y_test, sample_weights):
-    rf = RandomForestClassifier(n_jobs=6)
-    # 超参数搜索
-    param = {"n_estimators": [20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
-             "max_depth": [25, 35, 45, 55, 65, 75, 85, 95]}
-    gc = GridSearchCV(rf, param_grid=param, cv=5)
-    # 训练
-    print('start training')
-    gc.fit(x_train, y_train, sample_weight=sample_weights)
-    # 交叉验证网格搜索的结果
-    print("在测试集上的准确率：", gc.score(x_test, y_test))
-    print("在验证集上的准确率：", gc.best_score_)
-    print("最好的模型参数：", gc.best_params_)
-    print("最好的模型：", gc.best_estimator_)
+# def forest(x_train, x_test, y_train, y_test, sample_weights):
+# 超参数搜索
+# param = {"n_estimators": [20, 60, 100, 140, 180, 200],
+#          "max_depth": [10, 15, 20, 25, 30]}
+# 训练
+# for i in param['max_depth']:
+#     rf = RandomForestClassifier(n_jobs=-1, max_depth=i)
+#     rf.fit(x_train, y_train, sample_weight=sample_weights)
+#     y_pred = rf.predict(x_test)
+#     y_score = rf.predict_proba(x_test)[:, 1]
+#     acc, precision, recall, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
+#     report = metrics.classification_report(y_true=y_test,
+#                                            y_pred=y_pred,
+#                                            digits=4)
+#     print('-----------------------')
+#     print(i)
+#     print(acc, precision, recall, f1, auc)
+#     print(report)
+# return acc, precision, recall, f1, auc, report
 
 
-def mysvm(x_train, x_test, y_train, y_test):
-    model = svm.SVC(C=2, kernel='rbf', gamma=10, decision_function_shape='ovo')
-    model.fit(x_train, y_train)
-    y_pred = model.predict(x_test)
-    y_score = model.predict_proba(x_test)[:, 1]
-    acc, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
-    return acc, f1, auc
-
-
-def nb(x_train, x_test, y_train, y_test, sample_weights):
-    model = GaussianNB()
-    model.fit(x_train, y_train, sample_weight=sample_weights)
-    y_pred = model.predict(x_test)
-    y_score = model.predict_proba(x_test)[:, 1]
-    acc, precision, recall, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
-    report = metrics.classification_report(y_true=y_test,
-                                           y_pred=y_pred,
-                                           digits=4)
-    return acc, precision, recall, f1, auc, report
+# def nb(x_train, x_test, y_train, y_test, sample_weights):
+#     model = GaussianNB()
+#     model.fit(x_train, y_train, sample_weight=sample_weights)
+#     y_pred = model.predict(x_test)
+#     y_score = model.predict_proba(x_test)[:, 1]
+#     acc, precision, recall, f1, auc = evaluation(y_true=y_test, y_score=y_score, y_pred=y_pred)
+#     report = metrics.classification_report(y_true=y_test,
+#                                            y_pred=y_pred,
+#                                            digits=4)
+#     return acc, precision, recall, f1, auc, report
 
 
 def bagging(x_train, y_train, x_test, y_test):
@@ -89,14 +112,6 @@ def xgboost(x_train, y_train, x_test, y_test):
     y_pred = xgboost.predict(x_test)
     # print("xgboost accuracy : %.4g" % accuracy_score(y_test, y_pred))
 
-# class Classifier():
-#     def __init__(self, data, candidate, risklevel):
-#         self.data = data
-#         self.candidate = candidate
-#         self.risklevel = risklevel
-#         self.X = None
-#         self.y = None
-#
 #     def generate_training_data(self):
 #         X = [line[1:] for line in self.data]
 #
