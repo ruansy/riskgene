@@ -48,6 +48,7 @@ def get_candidate_gene(name_path, id_path):
         with open(id_path, 'w') as f:
             for line in positive_gene_id_set:
                 f.write(line + '\n')
+
     return positive_gene_name_set, set(positive_gene_id_set)
 
 

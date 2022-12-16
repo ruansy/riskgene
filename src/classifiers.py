@@ -7,8 +7,8 @@ from xgboost import XGBClassifier
 
 class Cmodel():
     def __init__(self, features, labels, sample_weights):
-        self.y_score = None
-        self.y_pred = None
+        self.y_score = None  # 分数
+        self.y_pred = None  # 预测结果
         self.features = features
         self.labels = labels
         self.model = None

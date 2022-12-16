@@ -1,5 +1,5 @@
-import subprocess
 import os
+import subprocess
 
 INPUT_NETWORK_PATH = r'C:\Users\dell\PycharmProjects\riskgene\data\network\PPI-Network.txt'
 EMB_ROOT_PATH = r'C:\Users\dell\PycharmProjects\riskgene\data\emb'
