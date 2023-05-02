@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from src import classifiers as cl
+from src import classifier as cl
 from src import ppi
 
 
@@ -29,6 +29,7 @@ def training(emb_path, cl_method, ge_method):
     for name in filenames:
         param, X, y = parse_emb(ge_method=ge_method, file_name=name)
         x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
         acc, f1, auc = cl.nb(x_train, x_test, y_train, y_test)
 
         if ge_method == 'deepwalk':

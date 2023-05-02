@@ -8,7 +8,7 @@ EMB_ROOT_PATH = r'C:\Users\dell\PycharmProjects\riskgene\data\emb'
 def node2vec(output_file_name, p=1, q=1, dim=128, length=80, num=10):
     output_file_path = os.path.join(EMB_ROOT_PATH, 'node2vec', output_file_name)
     command_line = [
-        'python', '-m', 'openne', \
+        'python', '-m', 'openne',
         '--method', 'node2vec',
         '--input', INPUT_NETWORK_PATH,
         '--graph-format', 'edgelist',
